@@ -104,26 +104,27 @@ dgpsReferenceStation = do
 
 gpgga :: Parser Gpgga
 gpgga = do
-  _    <- string "$GPGGA,"
+  string "$GPGGA,"
   time <- timeUTC
-  _    <- char ','
+  _    <- comma
   lat  <- latitude
-  _    <- char ','
+  _    <- comma
   lon  <- longitude
-  _    <- char ','
+  _    <- comma
   qual <- positionFixIndicator
-  _    <- char ','
+  _    <- comma
   nsat <- decimal :: Parser Int
-  _    <- char ','
+  _    <- comma
   dilu <- double
-  _    <- char ','
+  _    <- comma
   alti <- double
-  _    <- char ',' *> char 'M' *> ","
+  _    <- comma *> char 'M' *> ","
   geoi <- option 0 double
-  _    <- char ',' *> option 'M' (char 'M') *> ","
+  _    <- comma *> option 'M' (char 'M') *> comma
   age  <- option 0 double
-  _    <- char ','
+  _    <- comma
   dgps <- option (DGPSReferenceStation 0) dgpsReferenceStation
   _    <- char '*'
   cs   <- hexadecimal :: Parser Int
   return (Gpgga time lat lon qual nsat dilu alti geoi age dgps) <?> "GPPGA"
+  where comma = char ','
