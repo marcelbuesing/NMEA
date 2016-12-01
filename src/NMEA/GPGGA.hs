@@ -1,11 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StandaloneDeriving #-}
+
 module NMEA.GPGGA where
 
 import           Control.Applicative ((<|>))
 import           Data.Attoparsec.Text
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
-import           Data.Time.LocalTime (ZonedTime, utc, zonedTimeZone)
+import           Data.Time.LocalTime (ZonedTime(..), utc, zonedTimeZone)
 import           Data.Time.Format (defaultTimeLocale, formatTime, parseTimeOrError, readSTime)
 
 -- $GPGGA,HHMMSS.ss,BBBB.BBBB,b,LLLLL.LLLL,l,Q,NN,D.D,H.H,h,G.G,g,A.A,RRRR*PP
@@ -13,24 +15,24 @@ import           Data.Time.Format (defaultTimeLocale, formatTime, parseTimeOrErr
 -- $GPGGA,235947.000,0000.0000,N,00000.0000,E,0,00,0.0,0.0,M,,,,0000*00
 -- $GPGGA,092204.999,4250.5589,S,14718.5084,E,1,04,24.4,19.7,M,,,,0000*1F
 
-data LatitudeDirection = North | South deriving Show
+data LatitudeDirection = North | South deriving (Eq, Show)
 
 data Latitude = Latitude
   { _latitudeValue     :: Double
   , _latitudeDirection :: LatitudeDirection
-  } deriving Show
+  } deriving (Eq, Show)
 
-data LongitudeDirection = East | West deriving Show
+data LongitudeDirection = East | West deriving (Eq, Show)
 
 data Longitude = Longitude
   { _longitudeValue     :: Double
   , _longitudeDirection :: LongitudeDirection
-  } deriving Show
+  } deriving (Eq, Show)
 
 -- | GPS quality indicator
-data PositionFixIndicator = InvalidFix | GPSFix | DGPSFix | DeadReckoningMode deriving Show
+data PositionFixIndicator = InvalidFix | GPSFix | DGPSFix | DeadReckoningMode deriving (Eq, Show)
 
-newtype DGPSReferenceStation = DGPSReferenceStation { _dgpsReferenceStation :: Int } deriving Show
+newtype DGPSReferenceStation = DGPSReferenceStation { _dgpsReferenceStation :: Int } deriving (Eq, Show)
 
 -- | Global Positioning System Fix Data
 data Gpgga = Gpgga
@@ -44,7 +46,9 @@ data Gpgga = Gpgga
   , _gppgaGeoidalSeparation        :: Double
   , _gppgaAgeDifferentialGPSData   :: Double
   , _gppgaDgpsReferenceStation     :: DGPSReferenceStation
-  } deriving Show
+  } deriving (Eq, Show)
+
+deriving instance Eq ZonedTime
 
 -- | time as UTC missing date information
 timeUTC :: Parser ZonedTime
