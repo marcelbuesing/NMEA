@@ -27,10 +27,12 @@ data Longitude = Longitude
   , _longitudeDirection :: LongitudeDirection
   } deriving Show
 
+-- | GPS quality indicator
 data PositionFixIndicator = InvalidFix | GPSFix | DGPSFix | DeadReckoningMode deriving Show
 
 newtype DGPSReferenceStation = DGPSReferenceStation { _dgpsReferenceStation :: Int } deriving Show
 
+-- | Global Positioning System Fix Data
 data Gpgga = Gpgga
   { _gppgaTimeUTC                  :: ZonedTime
   , _gppgaLatitude                 :: Latitude
@@ -44,6 +46,7 @@ data Gpgga = Gpgga
   , _gppgaDgpsReferenceStation     :: DGPSReferenceStation
   } deriving Show
 
+-- | time as UTC missing date information
 timeUTC :: Parser ZonedTime
 timeUTC = do
   hh <- T.pack <$> count 2 digit
@@ -79,8 +82,8 @@ longitude = do
   d <- longitudeDirection
   return (Longitude v d) <?> "Longitude"
 
-gpsQuality :: Parser PositionFixIndicator
-gpsQuality =
+positionFixIndicator :: Parser PositionFixIndicator
+positionFixIndicator =
       (char '0' >> return InvalidFix)
   <|> (char '1' >> return GPSFix)
   <|> (char '2' >> return DGPSFix)
@@ -104,7 +107,7 @@ gpgga = do
   _    <- char ','
   lon  <- longitude
   _    <- char ','
-  qual <- gpsQuality
+  qual <- positionFixIndicator
   _    <- char ','
   nsat <- decimal :: Parser Int
   _    <- char ','
