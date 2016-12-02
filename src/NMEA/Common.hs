@@ -1,0 +1,93 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StandaloneDeriving #-}
+
+module NMEA.Common where
+
+import           Control.Applicative ((<|>))
+import           Data.Attoparsec.Text
+import           Data.Time.Calendar (Day(..), fromGregorian)
+import           Data.Time.LocalTime (ZonedTime(..), utc, zonedTimeZone)
+import           Data.Time.Format (defaultTimeLocale, formatTime, parseTimeOrError, readSTime)
+import           Data.Monoid ((<>))
+import qualified Data.Text as T
+
+data LatitudeDirection = North | South deriving (Eq, Show)
+
+data Latitude = Latitude
+  { _latitudeValue     :: Double
+  , _latitudeDirection :: LatitudeDirection
+  } deriving (Eq, Show)
+
+data LongitudeDirection = East | West deriving (Eq, Show)
+
+data Longitude = Longitude
+  { _longitudeValue     :: Double
+  , _longitudeDirection :: LongitudeDirection
+  } deriving (Eq, Show)
+
+-- | Speed in knots, equal to one nautical mile per hour.
+newtype Knot  = Knot { _unKnot :: Double } deriving (Eq, Show)
+
+-- | e.g. 90°, max 360°
+newtype Degree = Degree { _unDegree :: Double } deriving (Eq, Show)
+
+-- | time as UTC missing date information
+timeUTC :: Parser ZonedTime
+timeUTC = do
+  hh <- T.pack <$> count 2 digit
+  mm <- T.pack <$> count 2 digit
+  ss <- T.pack <$> count 2 digit
+  sss  <- T.pack <$> option "" (char '.' *> many1 digit)
+  let ztime = ptime (T.unpack (hh <> mm <> ss <> "." <> sss))
+  return $ ztime { zonedTimeZone = utc}
+  where ptime s = parseTimeOrError False defaultTimeLocale "%H%M%S%Q" s :: ZonedTime
+
+-- e.g. 2000
+type Century = Integer
+
+-- | requires current century to determine correct date e.g. 2000
+day :: Century -> Parser Day
+day century = do
+  dd <- read <$> count 2 digit
+  mm <- read <$> count 2 digit
+  yy <- read <$> count 2 digit
+  return $ fromGregorian (century + yy) mm dd
+
+deriving instance Eq ZonedTime
+
+latitudeDirection :: Parser LatitudeDirection
+latitudeDirection =
+      (char 'N' >> return North)
+  <|> (char 'S' >> return South)
+
+latitude :: Parser Latitude
+latitude = do
+  v <- double
+  _ <- comma
+  d <- latitudeDirection
+  return (Latitude v d) <?> "Latitude"
+
+longitudeDirection :: Parser LongitudeDirection
+longitudeDirection =
+      (char 'E' >> return East)
+  <|> (char 'W' >> return West)
+  <?> "Longitude Direction"
+
+longitude :: Parser Longitude
+longitude = do
+  v <- double
+  _ <- comma
+  d <- longitudeDirection
+  return (Longitude v d) <?> "Longitude"
+
+knot :: Parser Knot
+knot = Knot <$> double
+
+degree :: Parser Degree
+degree = Degree <$> double
+
+checksum :: Parser Int
+checksum =  char '*' *> hexadecimal :: Parser Int
+
+comma :: Parser Char
+comma = char ','
