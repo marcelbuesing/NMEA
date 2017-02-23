@@ -14,6 +14,7 @@ import           NMEA.Sentence
 main = defaultMain $ testGroup "NMEA"
   [ testCase "GPGGA" gpggaTest
   , testCase "GPRMC" gprmcTest
+  , testCase "GPHDT" gphdtTest
   ]
 
 
@@ -55,3 +56,9 @@ gprmcTest = do
           , _gprmcMode = Autonomous
           }
     parseOnly (gprmc 1900) sGprmc @=? Right eGprmc
+
+gphdtTest :: Assertion
+gphdtTest =
+  parseOnly gphdt sGphdt @=? Right eGphdt
+  where sGphdt = "$GPHDT,175.58,T*0C"
+        eGphdt = Gphdt (Degree 175.58)

@@ -35,7 +35,12 @@ data Sentence =
   , _gppgaGeoidalSeparation        :: Double
   , _gppgaAgeDifferentialGPSData   :: Double
   , _gppgaDgpsReferenceStation     :: DGPSReferenceStation
-  } deriving (Eq, Show)
+  } |
+  -- | Heading from True North
+  Gphdt
+  { _gphdtHeadingInDegrees :: Degree
+  }
+  deriving (Eq, Show)
 
 sentence :: Century -> Parser Sentence
 sentence century = gpgga <|> gprmc century
@@ -88,3 +93,12 @@ gpgga = do
   dgps <- option (DGPSReferenceStation 0) dgpsReferenceStation
   _    <- checksum
   return (Gpgga time lat lon qual nsat dilu alti geoi age dgps) <?> "GPPGA"
+
+gphdt = do
+  string "$GPHDT"
+  _    <- comma
+  deg  <- degree
+  _    <- comma
+  _    <- char 'T'
+  _    <- checksum
+  return $ Gphdt deg
