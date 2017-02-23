@@ -6,7 +6,6 @@ import           Control.Applicative ((<|>))
 import           Data.Attoparsec.Text
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
-import           Data.Time.LocalTime (ZonedTime(..))
 
 import NMEA.Common
 
@@ -24,20 +23,6 @@ data PositionFixIndicator =
 
 newtype DGPSReferenceStation = DGPSReferenceStation { _dgpsReferenceStation :: Int } deriving (Eq, Show)
 
--- | Global Positioning System Fix Data
-data Gpgga = Gpgga
-  { _gppgaTimeUTC                  :: ZonedTime
-  , _gppgaLatitude                 :: Latitude
-  , _gppgaLongitude                :: Longitude
-  , _gppgaGpsQuality               :: PositionFixIndicator
-  , _gppgaNumberOfSatellites       :: Int
-  , _gppgaHorizDilutionOfPrecision :: Double
-  , _gppgaAltitude                 :: Double
-  , _gppgaGeoidalSeparation        :: Double
-  , _gppgaAgeDifferentialGPSData   :: Double
-  , _gppgaDgpsReferenceStation     :: DGPSReferenceStation
-  } deriving (Eq, Show)
-
 positionFixIndicator :: Parser PositionFixIndicator
 positionFixIndicator =
       (char '0' >> return InvalidFix)
@@ -53,28 +38,3 @@ dgpsReferenceStation :: Parser DGPSReferenceStation
 dgpsReferenceStation = do
   d <- read <$> count 4 digit
   return (DGPSReferenceStation d) <?> "DGPSReferenceStation"
-
-gpgga :: Parser Gpgga
-gpgga = do
-  string "$GPGGA,"
-  time <- timeUTC
-  _    <- comma
-  lat  <- latitude
-  _    <- comma
-  lon  <- longitude
-  _    <- comma
-  qual <- positionFixIndicator
-  _    <- comma
-  nsat <- decimal :: Parser Int
-  _    <- comma
-  dilu <- double
-  _    <- comma
-  alti <- double
-  _    <- comma *> char 'M' *> ","
-  geoi <- option 0 double
-  _    <- comma *> option 'M' (char 'M') *> comma
-  age  <- option 0 double
-  _    <- comma
-  dgps <- option (DGPSReferenceStation 0) dgpsReferenceStation
-  _    <- checksum
-  return (Gpgga time lat lon qual nsat dilu alti geoi age dgps) <?> "GPPGA"

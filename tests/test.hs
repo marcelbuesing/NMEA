@@ -9,6 +9,7 @@ import           Data.Time.LocalTime (LocalTime(..), ZonedTime(..), midday, midn
 import           NMEA.Common
 import           NMEA.GPGGA
 import           NMEA.GPRMC
+import           NMEA.Sentence
 
 main = defaultMain $ testGroup "NMEA"
   [ testCase "GPGGA" gpggaTest
