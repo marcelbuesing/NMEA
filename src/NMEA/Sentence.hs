@@ -23,7 +23,7 @@ data Sentence =
   , _gprmcSpeedOverGround   :: Knot
   , _gprmcCourseOverGround  :: Degree
   , _gpmrcDate              :: Day
-  , _gpmrcMagneticVariation :: MagneticVariation
+  , _gpmrcMagneticVariation :: Maybe MagneticVariation
   , _gprmcMode              :: GprmcMode
   } |
   -- | Global Positioning System Fix Data
@@ -87,12 +87,11 @@ gprmc cen = do
   _    <- comma
   date <- day cen
   _    <- comma
-  mv   <- option (MagneticVariation (Degree 0) East) magneticVariation
---  _    <- comma
---  mode <- option Autonomous gprmcMode
+  mv   <- magneticVariation
   _    <- comma
+  mode <- gprmcMode
   _    <- checksum
-  return $ Gprmc time stat lat lon spd deg date mv Autonomous
+  return $ Gprmc time stat lat lon spd deg date mv mode
 
 gpgga :: Parser Sentence
 gpgga = do

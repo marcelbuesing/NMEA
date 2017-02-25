@@ -22,12 +22,12 @@ gprmcStatus =
       (char 'A' >> return DataValid)
   <|> (char 'V' >> return DataNotValid)
 
-magneticVariation :: Parser MagneticVariation
+magneticVariation :: Parser (Maybe MagneticVariation)
 magneticVariation = do
-  v <- degree
+  v <- option Nothing $ Just <$> degree
   _ <- comma
-  d <- longitudeDirection
-  return (MagneticVariation v d) <?> "Magnetic Variation"
+  d <- option Nothing $ Just <$> longitudeDirection
+  return $ MagneticVariation <$> v <*> d
 
 gprmcMode :: Parser GprmcMode
 gprmcMode =
