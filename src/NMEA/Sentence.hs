@@ -11,6 +11,7 @@ import NMEA.Common
 import NMEA.GPGGA
 import NMEA.GPRMC
 import NMEA.GPGSA
+import NMEA.GPGSV
 
 data Sentence =
     -- | Recommended minimum specific GNSS data
@@ -42,7 +43,7 @@ data Sentence =
   Gphdt
   { _gphdtHeadingInDegrees :: Degree
   } |
-  -- | GPS Satellites in view (active)
+  -- | GPS DOP and active satellites
   Gpgsa
   { _gpgsaMode          :: GPGSAMode
   , _gpgsaPositionFix   :: PositionFix
@@ -50,6 +51,14 @@ data Sentence =
   , _gpgsaPDOP          :: PDOP
   , _gpgsaHDOP          :: HDOP
   , _gpgsaVDOP          :: VDOP
+  } |
+  -- | GPS satellites in view
+  Gpgsv
+  {
+    _gpgsvTotalMessage :: Int
+  , _gpgsvMessageNumber :: Int
+  , _gpgsvNumberOfSatellitesInView :: Int
+  , _gpgsvSatellitesInView :: [SatelliteInView]
   }
   deriving (Eq, Show)
 
@@ -123,11 +132,25 @@ gpgsa = do
   _     <- comma
   fix   <- positionFix
   _     <- comma
-  sats  <- catMaybes <$> count 12 (satellitePRN <* comma)
+  sats  <- catMaybes <$> count 12 ((option Nothing $ Just <$> satellitePRN) <* comma)
   pdop' <- pdop
   _     <- comma
   hdop' <- hdop
   _     <- comma
   vdop' <- vdop
-  --_     <- checksum
+  _     <- checksum
   return $ Gpgsa mode fix  sats pdop' hdop' vdop'
+
+gpgsv :: Parser Sentence
+gpgsv = do
+  string "$GPGSV"
+  _ <- comma
+  totalMsg  <- decimal
+  _         <- comma
+  msgNumber <- decimal
+  _         <- comma
+  inView    <- decimal
+  sats      <- catMaybes <$> count 4 (comma *> satelliteInView)
+  --_         <- checksum
+  return $ Gpgsv totalMsg msgNumber inView sats
+  

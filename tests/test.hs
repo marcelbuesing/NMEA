@@ -10,6 +10,7 @@ import           NMEA.Common
 import           NMEA.GPGGA
 import           NMEA.GPRMC
 import           NMEA.GPGSA
+import           NMEA.GPGSV
 import           NMEA.Sentence
 
 main = defaultMain $ testGroup "NMEA"
@@ -17,6 +18,7 @@ main = defaultMain $ testGroup "NMEA"
   , testCase "GPRMC" gprmcTest
   , testCase "GPHDT" gphdtTest
   , testCase "GPGSA" gpgsaTest
+  , testCase "GPGSV" gpgsvTest
   ]
 
 
@@ -71,3 +73,13 @@ gpgsaTest =
   where sGpgsa = "$GPGSA,A,3,19,28,14,18,27,22,31,39,,,,,1.7,1.0,1.3*35"
         eSats = SatellitePRN <$> [19, 28, 14, 18, 27, 22, 31, 39]
         eGpgsa = Gpgsa Automatic FixNotAvailable eSats (PDOP 1.7) (HDOP 1.0) (VDOP 1.3)
+
+gpgsvTest :: Assertion
+gpgsvTest =
+  parseOnly gpgsv input @?= Right expected
+  where input = "$GPGSV,3,3,11,22,42,067,42,24,14,311,43,27,05,244,00,,,,*4D"
+        satA = SatelliteInView (SatellitePRN 22) (Elevation 42) (Azimuth 67) (SatelliteSNR 42)
+        satB = SatelliteInView (SatellitePRN 24) (Elevation 14) (Azimuth 311) (SatelliteSNR 43)
+        satC = SatelliteInView (SatellitePRN 27) (Elevation 5) (Azimuth 244) (SatelliteSNR 0)
+        sats = [satA, satB, satC]
+        expected = Gpgsv 3 3 11 sats

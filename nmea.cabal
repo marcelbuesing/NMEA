@@ -20,6 +20,7 @@ library
                      , NMEA.GPGGA
                      , NMEA.GPRMC
                      , NMEA.GPGSA
+                     , NMEA.GPGSV
                      , NMEA.Sentence
   -- other-modules:
   -- other-extensions:

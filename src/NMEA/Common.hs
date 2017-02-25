@@ -31,6 +31,18 @@ newtype Knot  = Knot { _unKnot :: Double } deriving (Eq, Show)
 -- | e.g. 90°, max 360°
 newtype Degree = Degree { _unDegree :: Double } deriving (Eq, Show)
 
+-- | elevation in degree, max 90°
+newtype Elevation = Elevation { _unElevation :: Int } deriving (Eq, Show)
+
+-- | Azimuth, degress from true north, 000 to 359
+newtype Azimuth = Azimuth { _unAzimuth :: Int } deriving (Eq, Show)
+
+-- | Satellite PRN (pseudo random code), unique satellite id
+newtype SatellitePRN = SatellitePRN { _unSatellitePRN :: Int } deriving (Eq, Show)
+
+-- | Signal to noise ratio, 00 - 99 dB
+newtype SatelliteSNR = SatelliteSNR { _unSatelliteSNR :: Int } deriving (Eq, Show)
+
 -- | time as UTC missing date information
 timeUTC :: Parser ZonedTime
 timeUTC = do
@@ -91,3 +103,15 @@ checksum =  char '*' *> hexadecimal :: Parser Int
 
 comma :: Parser Char
 comma = char ','
+
+satellitePRN :: Parser SatellitePRN
+satellitePRN = SatellitePRN <$> decimal
+
+satelliteSNR :: Parser SatelliteSNR
+satelliteSNR = SatelliteSNR <$> decimal
+
+elevation :: Parser Elevation
+elevation = Elevation <$> decimal
+
+azimuth :: Parser Azimuth
+azimuth = Azimuth <$> decimal
