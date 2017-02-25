@@ -63,7 +63,12 @@ data Sentence =
   deriving (Eq, Show)
 
 sentence :: Century -> Parser Sentence
-sentence century = gpgga <|> gprmc century
+sentence century =
+      gpgga
+  <|> gprmc century
+  <|> gphdt
+  <|> gpgsa
+  <|> gpgsv
 
 gprmc :: Century -> Parser Sentence
 gprmc cen = do
