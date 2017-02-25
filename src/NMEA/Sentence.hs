@@ -2,7 +2,7 @@
 module NMEA.Sentence where
 
 import           Control.Applicative ((<|>))
-import           Data.Attoparsec.Text
+import           Data.Attoparsec.ByteString.Char8
 import           Data.Time.Calendar (Day(..))
 import           Data.Time.LocalTime (ZonedTime(..))
 import           Data.Maybe (catMaybes)

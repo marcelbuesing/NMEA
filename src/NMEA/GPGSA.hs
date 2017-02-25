@@ -3,7 +3,7 @@
 module NMEA.GPGSA where
 
 import           Control.Applicative ((<|>))
-import           Data.Attoparsec.Text
+import           Data.Attoparsec.ByteString.Char8
 
 import NMEA.Common
 

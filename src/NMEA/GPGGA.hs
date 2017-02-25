@@ -3,7 +3,7 @@
 module NMEA.GPGGA where
 
 import           Control.Applicative ((<|>))
-import           Data.Attoparsec.Text
+import           Data.Attoparsec.ByteString.Char8
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
 

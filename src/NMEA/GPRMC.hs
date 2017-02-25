@@ -3,7 +3,7 @@
 module NMEA.GPRMC where
 
 import           Control.Applicative ((<|>))
-import           Data.Attoparsec.Text
+import           Data.Attoparsec.ByteString.Char8
 import           Data.Time.LocalTime (ZonedTime(..))
 import           NMEA.Common
 

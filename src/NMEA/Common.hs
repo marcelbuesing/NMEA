@@ -4,7 +4,7 @@
 module NMEA.Common where
 
 import           Control.Applicative ((<|>))
-import           Data.Attoparsec.Text
+import           Data.Attoparsec.ByteString.Char8
 import           Data.Time.Calendar (Day(..), fromGregorian)
 import           Data.Time.LocalTime (ZonedTime(..), utc, zonedTimeZone)
 import           Data.Time.Format (defaultTimeLocale, formatTime, parseTimeOrError, readSTime)
