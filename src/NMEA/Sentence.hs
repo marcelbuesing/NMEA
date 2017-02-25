@@ -5,10 +5,12 @@ import           Control.Applicative ((<|>))
 import           Data.Attoparsec.Text
 import           Data.Time.Calendar (Day(..))
 import           Data.Time.LocalTime (ZonedTime(..))
+import           Data.Maybe (catMaybes)
 
 import NMEA.Common
 import NMEA.GPGGA
 import NMEA.GPRMC
+import NMEA.GPGSA
 
 data Sentence =
     -- | Recommended minimum specific GNSS data
@@ -39,6 +41,15 @@ data Sentence =
   -- | Heading from True North
   Gphdt
   { _gphdtHeadingInDegrees :: Degree
+  } |
+  -- | GPS Satellites in view (active)
+  Gpgsa
+  { _gpgsaMode          :: GPGSAMode
+  , _gpgsaPositionFix   :: PositionFix
+  , _gpgsaSatellitenPRN :: [SatellitePRN]
+  , _gpgsaPDOP          :: PDOP
+  , _gpgsaHDOP          :: HDOP
+  , _gpgsaVDOP          :: VDOP
   }
   deriving (Eq, Show)
 
@@ -94,6 +105,7 @@ gpgga = do
   _    <- checksum
   return (Gpgga time lat lon qual nsat dilu alti geoi age dgps) <?> "GPPGA"
 
+gphdt :: Parser Sentence
 gphdt = do
   string "$GPHDT"
   _    <- comma
@@ -102,3 +114,20 @@ gphdt = do
   _    <- char 'T'
   _    <- checksum
   return $ Gphdt deg
+
+gpgsa :: Parser Sentence
+gpgsa = do
+  string "$GPGSA"
+  _     <- comma
+  mode  <- gpgsaMode
+  _     <- comma
+  fix   <- positionFix
+  _     <- comma
+  sats  <- catMaybes <$> count 12 (satellitePRN <* comma)
+  pdop' <- pdop
+  _     <- comma
+  hdop' <- hdop
+  _     <- comma
+  vdop' <- vdop
+  --_     <- checksum
+  return $ Gpgsa mode fix  sats pdop' hdop' vdop'

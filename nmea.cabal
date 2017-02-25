@@ -19,6 +19,7 @@ library
   exposed-modules:     NMEA.Common
                      , NMEA.GPGGA
                      , NMEA.GPRMC
+                     , NMEA.GPGSA
                      , NMEA.Sentence
   -- other-modules:
   -- other-extensions:
