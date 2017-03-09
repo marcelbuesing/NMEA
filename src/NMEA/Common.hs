@@ -11,19 +11,37 @@ import           Data.Time.Format (defaultTimeLocale, formatTime, parseTimeOrErr
 import           Data.Monoid ((<>))
 import qualified Data.Text as T
 
+data DegreesMinutes = DegreesMinutes Int Double
+  deriving (Eq, Show)
+
+
 data LatitudeDirection = North | South deriving (Eq, Show)
 
 data Latitude = Latitude
-  { _latitudeValue     :: Double
+  { _latitudeValue     :: DegreesMinutes
   , _latitudeDirection :: LatitudeDirection
   } deriving (Eq, Show)
 
 data LongitudeDirection = East | West deriving (Eq, Show)
 
 data Longitude = Longitude
-  { _longitudeValue     :: Double
+  { _longitudeValue     :: DegreesMinutes
   , _longitudeDirection :: LongitudeDirection
   } deriving (Eq, Show)
+
+
+class HasDD x where
+  toDD :: x -> Double
+
+
+instance HasDD Longitude where
+  toDD (Longitude dm East) = toDecimalDegrees dm
+  toDD (Longitude dm West) = negate (toDecimalDegrees dm)
+
+instance HasDD Latitude where
+  toDD (Latitude dm North) = toDecimalDegrees dm
+  toDD (Latitude dm South) = negate (toDecimalDegrees dm)
+
 
 -- | Speed in knots, equal to one nautical mile per hour.
 newtype Knot  = Knot { _unKnot :: Double } deriving (Eq, Show)
@@ -74,7 +92,7 @@ latitudeDirection =
 
 latitude :: Parser Latitude
 latitude = do
-  v <- double
+  v <- degreesMinutes
   _ <- comma
   d <- latitudeDirection
   return (Latitude v d) <?> "Latitude"
@@ -87,7 +105,7 @@ longitudeDirection =
 
 longitude :: Parser Longitude
 longitude = do
-  v <- double
+  v <- degreesMinutes
   _ <- comma
   d <- longitudeDirection
   return (Longitude v d) <?> "Longitude"
@@ -115,3 +133,17 @@ elevation = Elevation <$> decimal
 
 azimuth :: Parser Azimuth
 azimuth = Azimuth <$> decimal
+
+degreesMinutes :: Parser DegreesMinutes
+degreesMinutes = toDegreesMinutes <$> double
+
+
+toDegreesMinutes :: Double -> DegreesMinutes
+toDegreesMinutes v = DegreesMinutes degrees (v - (fromIntegral (100 * degrees)))
+  where
+    degrees = floor (v / 100)
+
+toDecimalDegrees :: DegreesMinutes -> Double
+toDecimalDegrees (DegreesMinutes d m) = (fromIntegral d) + (m / 60)
+
+
