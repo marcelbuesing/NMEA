@@ -28,16 +28,16 @@ data Sentence =
   } |
   -- | Global Positioning System Fix Data
   Gpgga
-  { _gppgaTimeUTC                  :: ZonedTime
-  , _gppgaLatitude                 :: Latitude
-  , _gppgaLongitude                :: Longitude
-  , _gppgaGpsQuality               :: PositionFixIndicator
-  , _gppgaNumberOfSatellites       :: Int
-  , _gppgaHorizDilutionOfPrecision :: Double
-  , _gppgaAltitude                 :: Double
-  , _gppgaGeoidalSeparation        :: Double
-  , _gppgaAgeDifferentialGPSData   :: Double
-  , _gppgaDgpsReferenceStation     :: DGPSReferenceStation
+  { _gpggaTimeUTC                  :: ZonedTime
+  , _gpggaLatitude                 :: Latitude
+  , _gpggaLongitude                :: Longitude
+  , _gpggaGpsQuality               :: PositionFixIndicator
+  , _gpggaNumberOfSatellites       :: Int
+  , _gpggaHorizDilutionOfPrecision :: Double
+  , _gpggaAltitude                 :: Double
+  , _gpggaGeoidalSeparation        :: Double
+  , _gpggaAgeDifferentialGPSData   :: Double
+  , _gpggaDgpsReferenceStation     :: DGPSReferenceStation
   } |
   -- | Heading from True North
   Gphdt
