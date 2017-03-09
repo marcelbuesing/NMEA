@@ -19,7 +19,13 @@ data PositionFixIndicator =
     InvalidFix
   | GPSFix
   | DGPSFix
-  | DeadReckoningMode deriving (Eq, Show)
+  | PPSFix
+  | RTKFix
+  | FRTKFix
+  | DeadReckoningMode
+  | ManualMode
+  | SimulationMode
+  deriving (Eq, Show)
 
 newtype DGPSReferenceStation = DGPSReferenceStation { _dgpsReferenceStation :: Int } deriving (Eq, Show)
 
@@ -28,7 +34,12 @@ positionFixIndicator =
       (char '0' >> return InvalidFix)
   <|> (char '1' >> return GPSFix)
   <|> (char '2' >> return DGPSFix)
+  <|> (char '3' >> return PPSFix)
+  <|> (char '4' >> return RTKFix)
+  <|> (char '5' >> return FRTKFix)
   <|> (char '6' >> return DeadReckoningMode)
+  <|> (char '7' >> return ManualMode)
+  <|> (char '8' >> return SimulationMode)
   <?> "GPS Quality"
 
 numberOfSatellites :: Parser Int
