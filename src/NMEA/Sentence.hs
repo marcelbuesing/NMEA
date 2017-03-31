@@ -54,11 +54,21 @@ data Sentence =
   } |
   -- | GPS satellites in view
   Gpgsv
-  {
-    _gpgsvTotalMessage :: Int
+  { _gpgsvTotalMessage :: Int
   , _gpgsvMessageNumber :: Int
   , _gpgsvNumberOfSatellitesInView :: Int
   , _gpgsvSatellitesInView :: [SatelliteInView]
+  } |
+  -- | Track made good and ground speed
+  Gpvtg
+  { -- | true north bearing
+    _gpvtgCourseTrue :: Maybe TrueBearing
+  -- | magnetic bearing
+  , _gpvtgCourseMagnetic  :: Maybe MagneticBearing
+  -- | Speed over ground in knots
+  , _gpvtgSpeedKnots   :: Knot
+  -- | Speed over ground in kilometer per hour
+  , _gpvtgSpeedKph     :: Kmh
   }
   deriving (Eq, Show)
 
@@ -69,6 +79,7 @@ sentence century =
   <|> gphdt
   <|> gpgsa
   <|> gpgsv
+  <|> gpvtg
 
 gprmc :: Century -> Parser Sentence
 gprmc cen = do
@@ -157,4 +168,17 @@ gpgsv = do
   sats      <- catMaybes <$> count 4 (comma *> satelliteInView)
   --_         <- checksum
   return $ Gpgsv totalMsg msgNumber inView sats
-  
+
+gpvtg :: Parser Sentence
+gpvtg = do
+  string "$GPVTG"
+  _     <- comma
+  true  <- option Nothing $ Just . TrueBearing <$> degreesMinutes
+  _     <- comma *> char 'T' *> comma
+  magn  <- option Nothing $ Just . MagneticBearing <$> degreesMinutes
+  _     <- comma *> char 'M' *> comma
+  knot' <- knot
+  _     <- comma *> char 'N' *> comma
+  kmh'  <- kmh <* comma <* char 'K'
+  _     <- checksum
+  return $ Gpvtg true magn knot' kmh'

@@ -20,6 +20,7 @@ main = defaultMain $ testGroup "NMEA"
   , testCase "GPHDT" gphdtTest
   , testCase "GPGSA" gpgsaTest
   , testCase "GPGSV" gpgsvTest
+  , testCase "GPVTG" gpvtgTest
   ]
 
 
@@ -96,3 +97,13 @@ gpgsvTest =
         satC = SatelliteInView (SatellitePRN 27) (Elevation 5) (Azimuth 244) (SatelliteSNR 0)
         sats = [satA, satB, satC]
         expected = Gpgsv 3 3 11 sats
+
+gpvtgTest :: Assertion
+gpvtgTest =
+  parseOnly gpvtg input @?= Right expected
+  where input = "$GPVTG,0.0,T,359.6,M,0.0,N,0.0,K*47"
+        true = Just $ TrueBearing $ toDegreesMinutes 0.0
+        magn = Just $ MagneticBearing $ toDegreesMinutes 359.6
+        knot' = Knot 0.0
+        kmh' = Kmh 0.0
+        expected = Gpvtg true magn knot' kmh'

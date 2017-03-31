@@ -46,6 +46,9 @@ instance HasDD Latitude where
 -- | Speed in knots, equal to one nautical mile per hour.
 newtype Knot  = Knot { _unKnot :: Double } deriving (Eq, Show)
 
+-- | Speed in kilometer per hour
+newtype Kmh = Kmh { _unKmh :: Double } deriving (Eq, Show)
+
 -- | e.g. 90°, max 360°
 newtype Degree = Degree { _unDegree :: Double } deriving (Eq, Show)
 
@@ -60,6 +63,14 @@ newtype SatellitePRN = SatellitePRN { _unSatellitePRN :: Int } deriving (Eq, Sho
 
 -- | Signal to noise ratio, 00 - 99 dB
 newtype SatelliteSNR = SatelliteSNR { _unSatelliteSNR :: Int } deriving (Eq, Show)
+
+-- | Magnetic north bearing
+newtype MagneticBearing =
+  MagneticBearing { _unMagneticBearing :: DegreesMinutes } deriving (Eq, Show)
+
+-- | True north bearing
+newtype TrueBearing =
+  TrueBearing { _unTrueBearing :: DegreesMinutes } deriving (Eq, Show)
 
 -- | time as UTC missing date information
 timeUTC :: Parser ZonedTime
@@ -113,6 +124,9 @@ longitude = do
 knot :: Parser Knot
 knot = Knot <$> double
 
+kmh :: Parser Kmh
+kmh = Kmh <$> double
+
 degree :: Parser Degree
 degree = Degree <$> double
 
@@ -145,5 +159,3 @@ toDegreesMinutes v = DegreesMinutes degrees (v - (fromIntegral (100 * degrees)))
 
 toDecimalDegrees :: DegreesMinutes -> Double
 toDecimalDegrees (DegreesMinutes d m) = (fromIntegral d) + (m / 60)
-
-
