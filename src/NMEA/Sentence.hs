@@ -134,9 +134,7 @@ gphdt = do
   string "$GPHDT"
   _    <- comma
   deg  <- degree
-  _    <- comma
-  _    <- char 'T'
-  _    <- checksum
+  _    <- comma <* char 'T' <* checksum
   return $ Gphdt deg
 
 gpgsa :: Parser Sentence
@@ -166,7 +164,7 @@ gpgsv = do
   _         <- comma
   inView    <- decimal
   sats      <- catMaybes <$> count 4 (comma *> satelliteInView)
-  --_         <- checksum
+  _         <- checksum
   return $ Gpgsv totalMsg msgNumber inView sats
 
 gpvtg :: Parser Sentence
